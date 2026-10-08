@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>DevPilot AI</title>
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>DevPilot AI</h1>
+      <p class="subtitle">
+        Your AI assistant for understanding and improving code.
+      </p>
+
+      <label for="code">Your Code</label>
+
+      <textarea
+        id="code"
+        placeholder="Paste your JavaScript, Node.js, or SQL code here..."
+      ></textarea>
+
+      <label for="question">What do you want to know?</label>
+
+      <input
+        id="question"
+        type="text"
+        placeholder="Example: Explain this code"
+      />
+
+      <button id="askButton">Ask DevPilot</button>
+
+      <div class="result">
+        <h2>Response</h2>
+        <pre id="response">Your response will appear here...</pre>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
