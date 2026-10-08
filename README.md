@@ -90,7 +90,7 @@ git --version
 Clone the repository:
 
 ```bash
-git clone YOUR_GITHUB_REPOSITORY_URL
+git clone https://github.com/Subhash575/devpilot-ai.git
 ```
 
 Navigate into the project:
