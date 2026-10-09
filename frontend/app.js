@@ -1,10 +1,10 @@
-const codeInput = document.getElementById("code");
+const codeInput    = document.getElementById("code");
 const questionInput = document.getElementById("question");
-const askButton = document.getElementById("askButton");
-const responseBox = document.getElementById("response");
+const askButton    = document.getElementById("askButton");
+const responseBox  = document.getElementById("response");
 
 askButton.addEventListener("click", async () => {
-  const code = codeInput.value.trim();
+  const code     = codeInput.value.trim();
   const question = questionInput.value.trim();
 
   if (!code || !question) {
@@ -12,7 +12,11 @@ askButton.addEventListener("click", async () => {
     return;
   }
 
-  responseBox.textContent = "DevPilot is thinking...";
+  // ── Loading state ──────────────────────────────────────────
+  askButton.disabled    = true;
+  askButton.textContent = "Thinking...";
+  responseBox.textContent = "";
+  responseBox.classList.add("is-loading");
 
   try {
     const response = await fetch("http://localhost:5000/api/explain", {
@@ -20,10 +24,7 @@ askButton.addEventListener("click", async () => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        code,
-        question,
-      }),
+      body: JSON.stringify({ code, question }),
     });
 
     const data = await response.json();
@@ -35,5 +36,10 @@ askButton.addEventListener("click", async () => {
     responseBox.textContent = data.response;
   } catch (error) {
     responseBox.textContent = `Error: ${error.message}`;
+  } finally {
+    // ── Restore state (always runs) ────────────────────────────
+    askButton.disabled    = false;
+    askButton.textContent = "Ask DevPilot";
+    responseBox.classList.remove("is-loading");
   }
 });
