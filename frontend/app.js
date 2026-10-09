@@ -1,27 +1,37 @@
 const codeInput     = document.getElementById("code");
 const questionInput  = document.getElementById("question");
 const askButton     = document.getElementById("askButton");
-const responseBox   = document.getElementById("response");
+const copyButton    = document.getElementById("copyButton");
 const codeError     = document.getElementById("code-error");
 const questionError  = document.getElementById("question-error");
-const errorState    = document.getElementById("error-state");
-const errorMsg      = document.getElementById("error-msg");
 const retryButton   = document.getElementById("retryButton");
-const copyButton    = document.getElementById("copyButton");
 
-// ── Helpers ──────────────────────────────────────────────────
-function showResponseBox() {
-  responseBox.hidden = false;
-  errorState.hidden  = true;
+// Single panel + inner sections
+const panel      = document.getElementById("response-panel");
+const successBox = panel.querySelector(".rp-success");
+const errorMsg   = document.getElementById("error-msg");
+
+// ── State machine ─────────────────────────────────────────────
+/**
+ * Switch the response panel to one of four states.
+ *   state   : "empty" | "loading" | "success" | "error"
+ *   payload : { text }    for success
+ *             { message } for error
+ */
+function setResponseState(state, payload = {}) {
+  panel.dataset.state   = state;
+  copyButton.hidden     = state !== "success";
+
+  if (state === "success") {
+    successBox.innerHTML = formatResponse(payload.text);
+  }
+
+  if (state === "error") {
+    errorMsg.textContent = payload.message || "Something went wrong.";
+  }
 }
 
-function showErrorState(message) {
-  errorMsg.textContent  = message;
-  errorState.hidden     = false;
-  responseBox.hidden    = true;
-  copyButton.hidden     = true;   // no content to copy on error
-}
-
+// ── Field validation ──────────────────────────────────────────
 function validateFields() {
   let valid = true;
 
@@ -45,10 +55,10 @@ function validateFields() {
 // ── Response formatter ────────────────────────────────────────
 function escapeHtml(str) {
   return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+    .replace(/&/g,  "&amp;")
+    .replace(/</g,  "&lt;")
+    .replace(/>/g,  "&gt;")
+    .replace(/"/g,  "&quot;");
 }
 
 /**
@@ -64,11 +74,11 @@ function formatResponse(text) {
 
   parts.forEach((part, i) => {
     if (i % 2 === 1) {
-      // ── Code block ───────────────────────────────────────────
+      // Code block (inside fences)
       const code = escapeHtml(part.replace(/\n$/, ""));
       html += `<pre><code>${code}</code></pre>`;
     } else {
-      // ── Prose ─────────────────────────────────────────────────
+      // Prose (outside fences) — split on double newlines → <p>
       part.split(/\n{2,}/).forEach((para) => {
         const trimmed = para.trim();
         if (trimmed) {
@@ -81,24 +91,20 @@ function formatResponse(text) {
   return html || `<p>${escapeHtml(text)}</p>`;
 }
 
-// ── Core request ─────────────────────────────────────────────
+// ── Core request ──────────────────────────────────────────────
 async function doRequest() {
-  const code     = codeInput.value.trim();
-  const question = questionInput.value.trim();
-
-  // Loading state
   askButton.disabled    = true;
   askButton.textContent = "Thinking...";
-  responseBox.innerHTML = "";
-  responseBox.classList.add("is-loading");
-  copyButton.hidden     = true;             // hide while loading
-  showResponseBox();
+  setResponseState("loading");
 
   try {
     const response = await fetch("http://localhost:5000/api/explain", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code, question }),
+      body: JSON.stringify({
+        code:     codeInput.value.trim(),
+        question: questionInput.value.trim(),
+      }),
     });
 
     const data = await response.json();
@@ -107,21 +113,19 @@ async function doRequest() {
       throw new Error(data.error || "Something went wrong.");
     }
 
-    responseBox.innerHTML = formatResponse(data.response);
-    copyButton.hidden     = false;          // reveal only on success
+    setResponseState("success", { text: data.response });
   } catch (error) {
-    showErrorState(error.message);
+    setResponseState("error", { message: error.message });
   } finally {
     askButton.disabled    = false;
     askButton.textContent = "Ask DevPilot";
-    responseBox.classList.remove("is-loading");
   }
 }
 
 // ── Copy to clipboard ─────────────────────────────────────────
 copyButton.addEventListener("click", async () => {
   try {
-    await navigator.clipboard.writeText(responseBox.innerText);
+    await navigator.clipboard.writeText(successBox.innerText);
     copyButton.textContent = "✓ Copied!";
     copyButton.classList.add("copied");
   } catch {

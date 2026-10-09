@@ -3,21 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
     <title>DevPilot AI</title>
-
     <link rel="stylesheet" href="style.css" />
   </head>
 
   <body>
     <div class="container">
       <h1>DevPilot AI</h1>
-      <p class="subtitle">
-        Your AI assistant for understanding and improving code.
-      </p>
+      <p class="subtitle">Your AI assistant for understanding and improving code.</p>
 
       <label for="code">Your Code</label>
-
       <textarea
         id="code"
         placeholder="Paste your JavaScript, Node.js, or SQL code here..."
@@ -25,7 +20,6 @@
       <p class="field-error" id="code-error" aria-live="polite"></p>
 
       <label for="question">What do you want to know?</label>
-
       <input
         id="question"
         type="text"
@@ -38,20 +32,33 @@
       <div class="result">
         <div class="result-header">
           <h2>Response</h2>
-          <button id="copyButton" class="copy-btn" hidden aria-label="Copy response to clipboard">
-            Copy
-          </button>
+          <button id="copyButton" class="copy-btn" hidden
+                  aria-label="Copy response to clipboard">Copy</button>
         </div>
 
-        <!-- Success / loading state -->
-        <div id="response" class="response-body">
-          <p class="placeholder">Your response will appear here...</p>
-        </div>
+        <!-- Single state-driven panel. JS sets data-state to control visibility. -->
+        <div id="response-panel" class="response-panel" data-state="empty">
 
-        <!-- Error state (shown on request failure) -->
-        <div id="error-state" class="error-state" hidden>
-          <p id="error-msg"></p>
-          <button id="retryButton">↺ Retry</button>
+          <!-- empty ─────────────────────────────────────── -->
+          <div class="rp-empty">
+            <p class="placeholder">Your response will appear here...</p>
+          </div>
+
+          <!-- loading ────────────────────────────────────── -->
+          <div class="rp-loading">
+            <div class="spinner" role="status" aria-label="Loading response"></div>
+          </div>
+
+          <!-- success ────────────────────────────────────── -->
+          <div class="rp-success"></div>
+
+          <!-- error ──────────────────────────────────────── -->
+          <div class="rp-error">
+            <p class="rp-error__icon" aria-hidden="true">⚠️</p>
+            <p class="rp-error__msg" id="error-msg"></p>
+            <button id="retryButton" class="retry-btn">↺ Retry</button>
+          </div>
+
         </div>
       </div>
     </div>

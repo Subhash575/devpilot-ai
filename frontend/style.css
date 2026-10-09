@@ -159,45 +159,84 @@ button:disabled {
   opacity: 1;
 }
 
-.response-body {
-  position: relative;            /* anchor the loading spinner */
-  min-height: 100px;
+/* ── Response panel ─────────────────────────────────────────── */
+.response-panel {
+  min-height: 120px;
   padding: var(--space-md);
   background: var(--color-pre-bg);
   border-radius: var(--radius-sm);
 }
 
-/* Paragraphs rendered by formatResponse() */
-.response-body p {
+/* All inner sections hidden by default */
+.response-panel > div {
+  display: none;
+}
+
+/* Reveal only the section matching the active state */
+.response-panel[data-state="empty"]   .rp-empty  { display: block; }
+
+.response-panel[data-state="loading"] .rp-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80px;
+}
+
+.response-panel[data-state="success"] .rp-success { display: block; }
+
+.response-panel[data-state="error"]   .rp-error {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* ── Empty state ─────────────────────────────────────────────── */
+.rp-empty .placeholder {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-style: italic;
+  font-size: var(--fs-base);
+  line-height: 1.65;
+}
+
+/* ── Loading state ───────────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-btn-bg);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ── Success state ───────────────────────────────────────────── */
+.rp-success p {
   margin: 0 0 0.75em;
   line-height: 1.65;
   font-size: var(--fs-base);
 }
 
-.response-body p:last-child {
+.rp-success p:last-child {
   margin-bottom: 0;
 }
 
-/* Placeholder text */
-.response-body .placeholder {
-  color: var(--color-text-muted);
-  font-style: italic;
-}
-
-/* Code blocks rendered by formatResponse() */
-.response-body pre {
-  background: #e4e4e7;           /* slightly darker than container */
+.rp-success pre {
+  background: #e4e4e7;           /* slightly darker than panel bg */
   padding: 14px;
   border-radius: 6px;
   overflow-x: auto;
   margin: 0.5em 0 0.75em;
 }
 
-.response-body pre:last-child {
+.rp-success pre:last-child {
   margin-bottom: 0;
 }
 
-/* Global pre rule — now only used inside .response-body */
+/* Global pre / code — apply inside .rp-success pre */
 pre {
   white-space: pre-wrap;
   word-wrap: break-word;
@@ -211,57 +250,42 @@ code {
   font-size: var(--fs-code);
 }
 
-/* ── Loading spinner ───────────────────────────────────────── */
-@keyframes spin {
-  to { transform: rotate(360deg); }
+/* ── Error state ─────────────────────────────────────────────── */
+.rp-error__icon {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1;
 }
 
-.response-body.is-loading::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 28px;
-  height: 28px;
-  margin: -14px 0 0 -14px;
-  border: 3px solid var(--color-border);
-  border-top-color: var(--color-btn-bg);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+.rp-error__msg {
+  margin: 0;
+  font-size: var(--fs-base);
+  line-height: 1.5;
+  color: var(--color-error-text);
 }
 
-/* ── Field validation errors ───────────────────────────────── */
+.retry-btn {
+  align-self: flex-start;
+  margin-top: 0;               /* override global button top-margin */
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--color-error-text);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.retry-btn:hover {
+  opacity: 0.85;
+}
+
+/* ── Field validation errors ─────────────────────────────────── */
 .field-error {
   margin: 5px 0 0;
-  min-height: 18px;          /* prevent layout shift when empty */
+  min-height: 18px;            /* prevent layout shift when empty */
   font-size: 13px;
   color: var(--color-error-label);
 }
 
-/* ── Request error state ───────────────────────────────────── */
-.error-state {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-sm);
-  background: var(--color-error-bg);
-  border: 1px solid var(--color-error-border);
-  border-radius: var(--radius-sm);
-  padding: var(--space-md);
-  min-height: 100px;
-  color: var(--color-error-text);
-}
-
-.error-state p {
-  margin: 0;
-  font-size: var(--fs-base);
-  line-height: 1.5;
-}
-
-.error-state button {
-  align-self: flex-start;
-  margin-top: 0;             /* override the global button margin */
-  padding: 9px 20px;
-  background: var(--color-error-text);
-  font-size: 13px;
-  font-weight: bold;
-}
