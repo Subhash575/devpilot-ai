@@ -22,6 +22,7 @@
         id="code"
         placeholder="Paste your JavaScript, Node.js, or SQL code here..."
       ></textarea>
+      <p class="field-error" id="code-error" aria-live="polite"></p>
 
       <label for="question">What do you want to know?</label>
 
@@ -30,12 +31,21 @@
         type="text"
         placeholder="Example: Explain this code"
       />
+      <p class="field-error" id="question-error" aria-live="polite"></p>
 
       <button id="askButton">Ask DevPilot</button>
 
       <div class="result">
         <h2>Response</h2>
+
+        <!-- Success / loading state -->
         <pre id="response">Your response will appear here...</pre>
+
+        <!-- Error state (shown on request failure) -->
+        <div id="error-state" class="error-state" hidden>
+          <p id="error-msg"></p>
+          <button id="retryButton">↺ Retry</button>
+        </div>
       </div>
     </div>
 

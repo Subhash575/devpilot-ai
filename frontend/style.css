@@ -27,6 +27,12 @@
 
   /* Shadows */
   --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+  /* Error colors */
+  --color-error-text:   #991b1b;
+  --color-error-bg:     #fef2f2;
+  --color-error-border: #fca5a5;
+  --color-error-label:  #b91c1c;
 }
 
 /* ── Reset ─────────────────────────────────────────────────── */
@@ -144,4 +150,40 @@ pre.is-loading::after {
   border-top-color: var(--color-btn-bg);
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
+}
+
+/* ── Field validation errors ───────────────────────────────── */
+.field-error {
+  margin: 5px 0 0;
+  min-height: 18px;          /* prevent layout shift when empty */
+  font-size: 13px;
+  color: var(--color-error-label);
+}
+
+/* ── Request error state ───────────────────────────────────── */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  background: var(--color-error-bg);
+  border: 1px solid var(--color-error-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-md);
+  min-height: 100px;
+  color: var(--color-error-text);
+}
+
+.error-state p {
+  margin: 0;
+  font-size: var(--fs-base);
+  line-height: 1.5;
+}
+
+.error-state button {
+  align-self: flex-start;
+  margin-top: 0;             /* override the global button margin */
+  padding: 9px 20px;
+  background: var(--color-error-text);
+  font-size: 13px;
+  font-weight: bold;
 }
