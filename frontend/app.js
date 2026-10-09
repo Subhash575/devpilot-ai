@@ -7,6 +7,7 @@ const questionError  = document.getElementById("question-error");
 const errorState    = document.getElementById("error-state");
 const errorMsg      = document.getElementById("error-msg");
 const retryButton   = document.getElementById("retryButton");
+const copyButton    = document.getElementById("copyButton");
 
 // ── Helpers ──────────────────────────────────────────────────
 function showResponseBox() {
@@ -15,9 +16,10 @@ function showResponseBox() {
 }
 
 function showErrorState(message) {
-  errorMsg.textContent = message;
-  errorState.hidden    = false;
-  responseBox.hidden   = true;
+  errorMsg.textContent  = message;
+  errorState.hidden     = false;
+  responseBox.hidden    = true;
+  copyButton.hidden     = true;   // no content to copy on error
 }
 
 function validateFields() {
@@ -57,28 +59,25 @@ function escapeHtml(str) {
  *   - All text is HTML-escaped before insertion.
  */
 function formatResponse(text) {
-  // Split on opening/closing ``` fences (with optional language hint, e.g. ```js)
   const parts = text.split(/```(?:[^\n]*)?\n?/);
   let html = "";
 
   parts.forEach((part, i) => {
     if (i % 2 === 1) {
-      // ── Code block (odd index = inside fences) ───────────────
-      const code = escapeHtml(part.replace(/\n$/, "")); // strip trailing newline
+      // ── Code block ───────────────────────────────────────────
+      const code = escapeHtml(part.replace(/\n$/, ""));
       html += `<pre><code>${code}</code></pre>`;
     } else {
-      // ── Prose (even index = outside fences) ──────────────────
+      // ── Prose ─────────────────────────────────────────────────
       part.split(/\n{2,}/).forEach((para) => {
         const trimmed = para.trim();
         if (trimmed) {
-          // Preserve single line-breaks within a paragraph as <br>
           html += `<p>${escapeHtml(trimmed).replace(/\n/g, "<br>")}</p>`;
         }
       });
     }
   });
 
-  // Fallback: if nothing was generated, wrap the whole thing in a <p>
   return html || `<p>${escapeHtml(text)}</p>`;
 }
 
@@ -88,11 +87,12 @@ async function doRequest() {
   const question = questionInput.value.trim();
 
   // Loading state
-  askButton.disabled   = true;
+  askButton.disabled    = true;
   askButton.textContent = "Thinking...";
-  responseBox.innerHTML = "";               // clear previous content / placeholder
+  responseBox.innerHTML = "";
   responseBox.classList.add("is-loading");
-  showResponseBox();                        // ensure response div is visible for spinner
+  copyButton.hidden     = true;             // hide while loading
+  showResponseBox();
 
   try {
     const response = await fetch("http://localhost:5000/api/explain", {
@@ -108,15 +108,31 @@ async function doRequest() {
     }
 
     responseBox.innerHTML = formatResponse(data.response);
+    copyButton.hidden     = false;          // reveal only on success
   } catch (error) {
     showErrorState(error.message);
   } finally {
-    // Always restore button
     askButton.disabled    = false;
     askButton.textContent = "Ask DevPilot";
     responseBox.classList.remove("is-loading");
   }
 }
+
+// ── Copy to clipboard ─────────────────────────────────────────
+copyButton.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(responseBox.innerText);
+    copyButton.textContent = "✓ Copied!";
+    copyButton.classList.add("copied");
+  } catch {
+    copyButton.textContent = "Failed";
+  }
+
+  setTimeout(() => {
+    copyButton.textContent = "Copy";
+    copyButton.classList.remove("copied");
+  }, 2000);
+});
 
 // ── Event listeners ───────────────────────────────────────────
 askButton.addEventListener("click", () => {
@@ -128,6 +144,5 @@ retryButton.addEventListener("click", () => {
   doRequest();
 });
 
-// Clear inline error as soon as the user starts fixing the field
 codeInput.addEventListener("input",     () => { codeError.textContent     = ""; });
 questionInput.addEventListener("input", () => { questionError.textContent = ""; });

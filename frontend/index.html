@@ -36,7 +36,12 @@
       <button id="askButton">Ask DevPilot</button>
 
       <div class="result">
-        <h2>Response</h2>
+        <div class="result-header">
+          <h2>Response</h2>
+          <button id="copyButton" class="copy-btn" hidden aria-label="Copy response to clipboard">
+            Copy
+          </button>
+        </div>
 
         <!-- Success / loading state -->
         <div id="response" class="response-body">

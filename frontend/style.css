@@ -120,6 +120,45 @@ button:disabled {
   margin-top: var(--space-lg);
 }
 
+.result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-xs);
+}
+
+.result-header h2 {
+  margin: 0;
+}
+
+/* Copy button — ghost style, lives in .result-header */
+.copy-btn {
+  margin-top: 0;               /* override global button margin */
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.copy-btn:hover {
+  background: var(--color-bg);
+  color: var(--color-text);
+  border-color: #aaaaaa;
+  opacity: 1;                  /* cancel the global button:hover opacity */
+}
+
+.copy-btn.copied {
+  background: #16a34a;
+  color: #ffffff;
+  border-color: #16a34a;
+  opacity: 1;
+}
+
 .response-body {
   position: relative;            /* anchor the loading spinner */
   min-height: 100px;
