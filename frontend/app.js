@@ -40,17 +40,59 @@ function validateFields() {
   return valid;
 }
 
+// ── Response formatter ────────────────────────────────────────
+function escapeHtml(str) {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+/**
+ * Converts plain-text AI responses to structured HTML without a library.
+ *   - Text between triple-backtick fences → <pre><code>
+ *   - Paragraphs (double-newline separated) → <p>
+ *   - Single newlines within a paragraph   → <br>
+ *   - All text is HTML-escaped before insertion.
+ */
+function formatResponse(text) {
+  // Split on opening/closing ``` fences (with optional language hint, e.g. ```js)
+  const parts = text.split(/```(?:[^\n]*)?\n?/);
+  let html = "";
+
+  parts.forEach((part, i) => {
+    if (i % 2 === 1) {
+      // ── Code block (odd index = inside fences) ───────────────
+      const code = escapeHtml(part.replace(/\n$/, "")); // strip trailing newline
+      html += `<pre><code>${code}</code></pre>`;
+    } else {
+      // ── Prose (even index = outside fences) ──────────────────
+      part.split(/\n{2,}/).forEach((para) => {
+        const trimmed = para.trim();
+        if (trimmed) {
+          // Preserve single line-breaks within a paragraph as <br>
+          html += `<p>${escapeHtml(trimmed).replace(/\n/g, "<br>")}</p>`;
+        }
+      });
+    }
+  });
+
+  // Fallback: if nothing was generated, wrap the whole thing in a <p>
+  return html || `<p>${escapeHtml(text)}</p>`;
+}
+
 // ── Core request ─────────────────────────────────────────────
 async function doRequest() {
   const code     = codeInput.value.trim();
   const question = questionInput.value.trim();
 
   // Loading state
-  askButton.disabled    = true;
+  askButton.disabled   = true;
   askButton.textContent = "Thinking...";
-  responseBox.textContent = "";
+  responseBox.innerHTML = "";               // clear previous content / placeholder
   responseBox.classList.add("is-loading");
-  showResponseBox();                        // ensure pre is visible for spinner
+  showResponseBox();                        // ensure response div is visible for spinner
 
   try {
     const response = await fetch("http://localhost:5000/api/explain", {
@@ -65,7 +107,7 @@ async function doRequest() {
       throw new Error(data.error || "Something went wrong.");
     }
 
-    responseBox.textContent = data.response;
+    responseBox.innerHTML = formatResponse(data.response);
   } catch (error) {
     showErrorState(error.message);
   } finally {

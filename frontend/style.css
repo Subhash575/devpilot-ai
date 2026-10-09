@@ -115,18 +115,61 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* ── Response ──────────────────────────────────────────────── */
+/* ── Response container ────────────────────────────────────── */
 .result {
   margin-top: var(--space-lg);
 }
 
-pre {
-  background: var(--color-pre-bg);
+.response-body {
+  position: relative;            /* anchor the loading spinner */
+  min-height: 100px;
   padding: var(--space-md);
+  background: var(--color-pre-bg);
   border-radius: var(--radius-sm);
+}
+
+/* Paragraphs rendered by formatResponse() */
+.response-body p {
+  margin: 0 0 0.75em;
+  line-height: 1.65;
+  font-size: var(--fs-base);
+}
+
+.response-body p:last-child {
+  margin-bottom: 0;
+}
+
+/* Placeholder text */
+.response-body .placeholder {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* Code blocks rendered by formatResponse() */
+.response-body pre {
+  background: #e4e4e7;           /* slightly darker than container */
+  padding: 14px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 0.5em 0 0.75em;
+}
+
+.response-body pre:last-child {
+  margin-bottom: 0;
+}
+
+/* Global pre rule — now only used inside .response-body */
+pre {
   white-space: pre-wrap;
   word-wrap: break-word;
-  min-height: 100px;
+  font-family: monospace;
+  font-size: var(--fs-code);
+  line-height: 1.5;
+}
+
+code {
+  font-family: monospace;
+  font-size: var(--fs-code);
 }
 
 /* ── Loading spinner ───────────────────────────────────────── */
@@ -134,11 +177,7 @@ pre {
   to { transform: rotate(360deg); }
 }
 
-pre.is-loading {
-  position: relative;
-}
-
-pre.is-loading::after {
+.response-body.is-loading::after {
   content: "";
   position: absolute;
   top: 50%;
